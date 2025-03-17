@@ -4,6 +4,7 @@ import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 import RPi.GPIO as GPIO
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,13 @@ class SoilSensor:
         """
         Read and return the voltage from the soil sensor.
         """
-        voltage = self._channel.voltage
+        # Get average of readings
+        readings = []
+        max_readings = 50
+        while len(readings) < max_readings:
+            readings.append(self._channel.voltage)
+            time.sleep(0.2)
+        voltage = sum(readings)/max_readings
         logging.info(f"Soil sensor reading: {voltage:.3f} V")
         return voltage
 
