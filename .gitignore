@@ -4,3 +4,4 @@
 .pytest_cache
 MyPothos_water_data.txt
 .DS_Store
+__pycache__
