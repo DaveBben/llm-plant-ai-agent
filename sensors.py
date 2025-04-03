@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class SoilSensor:
     """
     Soil sensor that reads analog voltage from an ADS1115 ADC
-    over I2C. Higher voltage usually implies a wetter medium.
+    over I2C. Higher voltage usually implies a dryer medium.
     """
 
     def __init__(self):
@@ -43,7 +43,7 @@ class MotorControl:
     Controls the water motor via a GPIO pin on a Raspberry Pi.
     """
 
-    def __init__(self, pin_number: int = 18):
+    def __init__(self, pin_number: int = 23):
         """
         Initialize the GPIO pin for motor control.
 

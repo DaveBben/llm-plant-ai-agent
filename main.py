@@ -3,7 +3,9 @@ from autogen.coding import LocalCommandLineCodeExecutor
 from typing import Annotated, Literal
 import logging
 import os
+import json
 from datetime import datetime
+from pathlib import Path
 
 from autogen.cache import Cache
 from plant import Plant
@@ -15,7 +17,7 @@ logging.basicConfig(
 )
 
 
-water_motor = MotorControl(pin_number=18)
+water_motor = MotorControl(pin_number=23)
 soil_sensor = SoilSensor()
 my_plant = Plant(
     plant_name="MyPothos",
@@ -30,9 +32,10 @@ my_plant = Plant(
 # ----------------------------------------------------------
 CONFIG = [
     {
-        "model": os.getenv("MODEL", "Mistral-Small-24B-Instruct-2501-Q6"),
+        "model": os.getenv("MODEL", "/root/.cache/llama.cpp/bartowski_Qwen2.5-Coder-32B-Instruct-GGUF_Qwen2.5-Coder-32B-Instruct-Q4_K_L.gguf"),
         "api_key": os.getenv("API_KEY", "default"),  # Not needed for local ai
-        "base_url": os.getenv("BASE_URL", "http://192.168.1.16:8080/v1"),
+        "base_url": os.getenv("BASE_URL", "http://127.0.0.1:8080/v1"),
+        "price": [0.0, 0.0]
     }
 ]
 
@@ -43,9 +46,15 @@ CONFIG = [
 plant_agent = autogen.AssistantAgent(
     name="plant_agent",
     system_message=(
-        "Use only the functions provided to keep the plant "
-        f"alive and in good health. Today's date is {datetime.now()} "
-        "Reply TERMINATE when the task is done."
+        "You are a specialized AI assistant whose sole purpose is to keep a plant alive. "
+        "You have access only to the following tools (functions) which are provided to you; "
+        "you are not permitted to use or consider any other tools or methods. "
+        "If the user’s query or the current situation requires you to take an action, "
+        "use the appropriate provided tool. "
+        "Before calling a tool, you must first output a concise statement explaining "
+        "the reason for calling that tool, and then call the tool. "
+        "After each step, if you determine that no further action is necessary to keep the plant alive, "
+        "respond only with the exact word TERMINATE (in all caps) and nothing else."
     ),
     llm_config=CONFIG[0],
 )
@@ -69,7 +78,6 @@ user_proxy = autogen.UserProxyAgent(
 
 @user_proxy.register_for_execution(name="get_plant_type")
 @plant_agent.register_for_llm(
-    name="get_plant_type",
     description="Return the type of the plant (e.g., 'pothos', 'snake plant', etc.).",
 )
 def get_plant_type() -> str:
@@ -107,7 +115,11 @@ res = user_proxy.initiate_chat(
     summary_method="last_msg",
 )
 
+# Record Chat history
+file_name = f'{datetime.strftime(datetime.now(),"%Y-%m-%d-%H-%M-%S")}-chat.json'
+chat_hist_dir = Path(__file__).parent.resolve() / 'chat_history'
+chat_hist_dir.mkdir(exist_ok=True)
+chat_file = Path(chat_hist_dir /file_name)
+with open(chat_file, "w") as w_file:
+    w_file.write(json.dumps(res.chat_history))
 
-print("Chat history:", res.chat_history)
-print("Summary:", res.summary)
-print("Cost info:", res.cost)

@@ -104,7 +104,7 @@ class Plant:
         """
         logging.info("Starting watering process.")
         self._motor_crtl.turn_on()
-        time.sleep(3)
+        time.sleep(5)
         self._motor_crtl.turn_off()
         self._date_last_watered = datetime.now()
         self._save_last_watered()
@@ -120,9 +120,9 @@ class Plant:
         voltage = self._soil_sensor.get_voltage()
         # refer to notebook on how I got this linear calibration equation
         pred_meter = int((-8.3 * voltage) + 19.84)
-        if pred_meter < 4:
+        if pred_meter < 5:
             return "DRY"
-        elif 4 <= pred_meter < 8:
+        elif 5 <= pred_meter < 8:
             return "MOIST"
         elif pred_meter >= 8:
             return "WET"
