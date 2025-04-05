@@ -3,9 +3,9 @@
 I build an AI Agent that runs on my Raspberry Pi 5 and is in charge of keeping my plant alive.
 
 ## Hardware
-Raspberry Pi 5
-Capacitive Soil Moisture Sensor
-Water Pump
+* Raspberry Pi 5
+* Capacitive Soil Moisture Sensor
+* Water Pump
 
 ## Developing
 ```
